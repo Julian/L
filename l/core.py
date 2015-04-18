@@ -7,7 +7,10 @@ def run(arguments):
         git_dir = directory.child(".git")
         if git_dir.isdir():
             files = check_output(
-                ["git", "--git-dir", git_dir.path, "ls-files"],
+                [
+                    "git", "--git-dir", git_dir.path,
+                    "ls-tree", "--name-only", "HEAD",
+                ],
             ).splitlines()
         else:
             files = directory.listdir()
