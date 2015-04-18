@@ -16,4 +16,5 @@ def run(arguments):
             files = directory.listdir()
 
         for file in files:
-            print file
+            if not file.startswith("."):
+                print file
