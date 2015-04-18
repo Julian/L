@@ -1,6 +1,8 @@
 from subprocess import check_output
 import os
 
+from l.cli import _INCLUDING_DOT_AND_DOTDOT
+
 
 def run(arguments):
     for directory in arguments["directory"]:
@@ -15,6 +17,11 @@ def run(arguments):
         else:
             files = directory.listdir()
 
+        show_all = arguments["all"]
+        if show_all == _INCLUDING_DOT_AND_DOTDOT:
+            print ".\n.."
+        elif not show_all:
+            files = [file for file in files if not file.startswith(".")]
+
         for file in files:
-            if not file.startswith("."):
-                print file
+            print file
