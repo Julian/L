@@ -23,5 +23,4 @@ def run(arguments):
         elif not show_all:
             files = [file for file in files if not file.startswith(".")]
 
-        for file in files:
-            print file
+        print "  ".join(files)
