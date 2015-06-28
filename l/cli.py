@@ -1,9 +1,32 @@
 from argparse import ArgumentParser
+from subprocess import check_output
 
 from bp.filepath import FilePath
 
 
 _INCLUDING_DOT_AND_DOTDOT = "..."
+
+
+def project(raw_path):
+    path = FilePath(raw_path)
+    git_dir = path.child(".git")
+    if git_dir.isdir():
+        return GitPath(git_dir)
+    return FilePath(path)
+
+
+class GitPath(object):
+    def __init__(self, path):
+        self.path = path
+
+    def listdir(self):
+        return check_output(
+            [
+                "git", "--git-dir", self.path.path,
+                "ls-tree", "--name-only", "HEAD",
+            ],
+        ).splitlines()
+
 
 parser = ArgumentParser(
     description="Project-oriented directory and file information lister.",
@@ -25,7 +48,7 @@ parser.add_argument(
     "files",
     metavar="FILE",
     nargs="*",
-    type=FilePath,
-    default=(FilePath("."),),
+    type=project,
+    default=(project("."),),
     help="the directory whose contents to list",
 )
