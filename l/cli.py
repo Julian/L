@@ -12,7 +12,7 @@ def project(raw_path):
     git_dir = path.child(".git")
     if git_dir.isdir():
         return GitPath(git_dir)
-    return FilePath(path)
+    return path
 
 
 class GitPath(object):
