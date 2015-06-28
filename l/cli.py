@@ -6,7 +6,7 @@ from bp.filepath import FilePath
 _INCLUDING_DOT_AND_DOTDOT = "..."
 
 parser = ArgumentParser(
-    description="Project-oriented directory lister.",
+    description="Project-oriented directory and file information lister.",
 )
 parser.add_argument(
     "-a", "--all",
@@ -22,7 +22,8 @@ parser.add_argument(
     help="do not ignore entries that start with .",
 )
 parser.add_argument(
-    "directory",
+    "files",
+    metavar="FILE",
     nargs="*",
     type=FilePath,
     default=(FilePath("."),),

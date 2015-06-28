@@ -5,8 +5,8 @@ from l.cli import _INCLUDING_DOT_AND_DOTDOT
 
 
 def run(arguments):
-    for directory in arguments["directory"]:
-        git_dir = directory.child(".git")
+    for file in arguments["files"]:
+        git_dir = file.child(".git")
         if git_dir.isdir():
             files = check_output(
                 [
@@ -15,11 +15,11 @@ def run(arguments):
                 ],
             ).splitlines()
         else:
-            files = directory.listdir()
+            files = file.listdir()
 
         show_all = arguments["all"]
         if show_all == _INCLUDING_DOT_AND_DOTDOT:
-            print ".\n.."
+            print ".  .. ",
         elif not show_all:
             files = [file for file in files if not file.startswith(".")]
 
