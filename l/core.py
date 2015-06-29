@@ -1,12 +1,9 @@
-import os
-
-from l.cli import _INCLUDING_DOT_AND_DOTDOT
+_INCLUDING_DOT_AND_DOTDOT = "..."
 
 
-def run(arguments):
-    for file in arguments["files"]:
+def ls(files, show_all=False):
+    for file in files:
         files = file.listdir()
-        show_all = arguments["all"]
         if show_all == _INCLUDING_DOT_AND_DOTDOT:
             print ".  .. ",
         elif not show_all:

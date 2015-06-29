@@ -1,12 +1,11 @@
 import os
 import sys
 
-from l.cli import parser
-from l.core import run
+from l.cli import run
 
 
 def main():
-    run(arguments=vars(parser.parse_args()))
+    run()
     sys.exit(os.EX_OK)
 
 

@@ -3,8 +3,7 @@ from subprocess import check_output
 
 from bp.filepath import FilePath
 
-
-_INCLUDING_DOT_AND_DOTDOT = "..."
+from l.core import _INCLUDING_DOT_AND_DOTDOT, ls
 
 
 def project(raw_path):
@@ -52,3 +51,11 @@ parser.add_argument(
     default=(project("."),),
     help="the directory whose contents to list",
 )
+
+
+def run():
+    arguments = vars(parser.parse_args())
+    ls(
+        files=arguments["files"],
+        show_all=arguments["all"],
+    )
