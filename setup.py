@@ -22,9 +22,9 @@ classifiers = [
 setup(
     name="l",
     packages=find_packages(),
-    install_requires=["betterpath"],
+    install_requires=["betterpath", "click"],
     setup_requires=["vcversioner"],
-    entry_points={"console_scripts": ["l = l.__main__:main"]},
+    entry_points={"console_scripts": ["l = l.cli:run"]},
     vcversioner={"version_module_paths": ["l/_version.py"]},
     author="Julian Berman",
     author_email="Julian@GrayVines.com",
