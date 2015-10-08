@@ -1,3 +1,5 @@
+from sys import stdout
+
 import click
 
 from l.core import _INCLUDING_DOT_AND_DOTDOT, ls
@@ -27,17 +29,34 @@ PROJECT = Project()
     help="Do not ignore entries that start with '.'",
 )
 @click.argument(
-    "files",
+    "paths",
     nargs=VARIADIC,
     type=PROJECT,
 )
-def run(all, files):
+def run(all, paths):
     """
     Project-oriented directory and file information lister.
 
     """
 
-    ls(
-        files=files or (project("."),),
-        show_all=True if all == "almost" else all,
-    )
+    show(paths=paths or (project("."),))
+
+
+def show(paths, stdout=stdout):
+    if len(paths) == 1:
+        output = _formatted_children(ls(path=paths[0]))
+    else:
+        contents = sorted(
+            ((path, ls(path=path)) for path in paths),
+            key=lambda (path, _) : path.path,
+        )
+        output = "\n".join(
+            "{parent.path}:\n{children}".format(
+                parent=parent, children=_formatted_children(children=children),
+            ) for parent, children in contents
+        )
+    stdout.write(output)
+
+
+def _formatted_children(children):
+    return "  ".join(sorted(path.basename() for path in children)) + "\n"

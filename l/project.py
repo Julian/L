@@ -13,12 +13,19 @@ def project(raw_path):
 
 class GitPath(object):
     def __init__(self, path):
-        self.path = path
+        self._path = path
+
+    @property
+    def path(self):
+        return self._path.path
 
     def listdir(self):
         return check_output(
             [
-                "git", "--git-dir", self.path.path,
+                "git", "--git-dir", self.path,
                 "ls-tree", "--name-only", "HEAD",
             ],
         ).splitlines()
+
+    def children(self):
+        return [self._path.__class__(path) for path in self.listdir()]
