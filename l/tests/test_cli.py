@@ -1,9 +1,7 @@
-from StringIO import StringIO
 from textwrap import dedent
 from unittest import TestCase
 
 from bp.memory import MemoryFS, MemoryPath
-from hypothesis import given, strategies
 
 from l import cli
 
@@ -15,10 +13,8 @@ class TestShow(TestCase):
         self.root.createDirectory()
 
     def assertShows(self, result, **kwargs):
-        stdout = StringIO()
-        cli.show(stdout=stdout, **kwargs)
         self.assertEqual(
-            stdout.getvalue(),
+            cli.show(**kwargs),
             dedent(result).strip("\n") + "\n",
         )
 

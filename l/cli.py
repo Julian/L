@@ -33,16 +33,16 @@ PROJECT = Project()
     nargs=VARIADIC,
     type=PROJECT,
 )
-def run(all, paths):
+def run(all, paths, stdout=stdout):
     """
     Project-oriented directory and file information lister.
 
     """
 
-    show(paths=paths or (project("."),))
+    stdout.write(show(paths=paths or (project("."),)))
 
 
-def show(paths, stdout=stdout):
+def show(paths):
     if len(paths) == 1:
         children = (
             child for child in ls(path=paths[0])
@@ -59,7 +59,7 @@ def show(paths, stdout=stdout):
                 parent=parent, children=_formatted_children(children=children),
             ) for parent, children in contents
         )
-    stdout.write(output)
+    return output
 
 
 def _formatted_children(children):
