@@ -44,7 +44,11 @@ def run(all, paths):
 
 def show(paths, stdout=stdout):
     if len(paths) == 1:
-        output = _formatted_children(ls(path=paths[0]))
+        children = (
+            child for child in ls(path=paths[0])
+            if not child.basename().startswith(".")
+        )
+        output = _formatted_children(children)
     else:
         contents = sorted(
             ((path, ls(path=path)) for path in paths),

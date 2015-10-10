@@ -3,6 +3,7 @@ from textwrap import dedent
 from unittest import TestCase
 
 from bp.memory import MemoryFS, MemoryPath
+from hypothesis import given, strategies
 
 from l import cli
 
@@ -21,21 +22,25 @@ class TestShow(TestCase):
             dedent(result).strip("\n") + "\n",
         )
 
-    def test_it_lists_directories(self):
-        foo, bar = self.root.child("foo"), self.root.child("bar")
-        foo.setContent("")
-        bar.setContent("")
+    def children(self, *new, **kwargs):
+        of = kwargs.pop("of", self.root)
+        assert not kwargs
 
+        of.createDirectory()
+        for child in new:
+            path = of.child(child)
+            path.setContent("")
+            yield path
+
+    def test_it_lists_directories(self):
+        foo, bar = self.children("foo", "bar")
         self.assertShows(paths=[self.root], result="bar  foo")
 
     def test_it_lists_multiple_directories(self):
         one = self.root.child("one")
-        one.createDirectory()
-        one_two = one.child("two")
-        one_two.setContent("")
+        two, four = self.children("two", "four", of=one)
 
-        three = self.root.child("three")
-        three.setContent("")
+        three, = self.children("three")
 
         self.assertShows(
             paths=[self.root, one],
@@ -44,7 +49,11 @@ class TestShow(TestCase):
             one  three
 
             /mem/test-dir/one:
-            two
+            four  two
             """,
         )
 
+
+    def test_it_ignores_hidden_files_by_default(self):
+        foo, hidden = self.children("foo", ".hidden")
+        self.assertShows(paths=[self.root], result="foo")
