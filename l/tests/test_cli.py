@@ -53,3 +53,20 @@ class TestShow(TestCase):
     def test_it_ignores_hidden_files_by_default(self):
         foo, hidden = self.children("foo", ".hidden")
         self.assertShows(paths=[self.root], result="foo")
+
+    def test_it_ignores_hidden_files_by_default_for_multiple_directories(self):
+        one = self.root.child("one")
+        two, four = self.children(".two", "four", of=one)
+
+        three, = self.children(".three")
+
+        self.assertShows(
+            paths=[self.root, one],
+            result="""
+            /mem/test-dir:
+            one
+
+            /mem/test-dir/one:
+            four
+            """,
+        )

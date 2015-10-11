@@ -56,7 +56,13 @@ def show(paths):
         )
         output = "\n".join(
             "{parent.path}:\n{children}".format(
-                parent=parent, children=_formatted_children(children=children),
+                parent=parent,
+                children=_formatted_children(
+                    children=(
+                        child for child in children
+                        if not child.basename().startswith(".")
+                    )
+                )
             ) for parent, children in contents
         )
     return output
