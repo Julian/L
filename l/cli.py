@@ -43,29 +43,27 @@ def run(all, paths, stdout=stdout):
 
 
 def show(paths):
-    if len(paths) == 1:
-        children = (
-            child for child in ls(path=paths[0])
-            if not child.basename().startswith(".")
+    output = (_unhidden(ls(path=path)) for path in paths)
+    if len(paths) > 1:
+        output = _labelled(
+            sorted(zip(paths, output), key=lambda (path, _) : path.path)
         )
-        output = _formatted_children(children)
-    else:
-        contents = sorted(
-            ((path, ls(path=path)) for path in paths),
-            key=lambda (path, _) : path.path,
+    return "\n".join(output)
+
+
+def _labelled(parents_and_children):
+    return (
+        "{parent.path}:\n{children}".format(parent=parent, children=children)
+        for parent, children in parents_and_children
+    )
+
+
+def _unhidden(children):
+    return _formatted_children(
+        children=(
+            child for child in children if not child.basename().startswith(".")
         )
-        output = "\n".join(
-            "{parent.path}:\n{children}".format(
-                parent=parent,
-                children=_formatted_children(
-                    children=(
-                        child for child in children
-                        if not child.basename().startswith(".")
-                    )
-                )
-            ) for parent, children in contents
-        )
-    return output
+    )
 
 
 def _formatted_children(children):
