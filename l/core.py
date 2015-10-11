@@ -1,9 +1,17 @@
 def ls(path):
-    return path.children()
+    for child in path.children():
+        name = child.basename()
+        if name.startswith("."):
+            continue
+        yield name
+
+
+def ls_almost_all(path):
+    return path.listdir()
 
 
 def show(paths):
-    output = (_formatted_children(unhidden(path=path)) for path in paths)
+    output = (_formatted_children(ls(path=path)) for path in paths)
     if len(paths) > 1:
         output = _labelled(
             sorted(zip(paths, output), key=lambda (path, _) : path.path)
@@ -16,14 +24,6 @@ def _labelled(parents_and_children):
         "{parent.path}:\n{children}".format(parent=parent, children=children)
         for parent, children in parents_and_children
     )
-
-
-def unhidden(path):
-    for child in path.children():
-        name = child.basename()
-        if name.startswith("."):
-            continue
-        yield name
 
 
 def _formatted_children(children):
