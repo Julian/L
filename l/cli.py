@@ -2,7 +2,7 @@ from sys import stdout
 
 import click
 
-from l.core import _INCLUDING_DOT_AND_DOTDOT, show
+from l.core import show
 from l.project import project
 
 
@@ -20,7 +20,7 @@ PROJECT = Project()
 @click.command()
 @click.option(
     "-a", "--all",
-    flag_value=_INCLUDING_DOT_AND_DOTDOT,
+    flag_value="all",
     help="Like -A, but also display '.' and '..'",
 )
 @click.option(

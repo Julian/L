@@ -1,12 +1,9 @@
-_INCLUDING_DOT_AND_DOTDOT = "..."
-
-
 def ls(path):
     return path.children()
 
 
 def show(paths):
-    output = (_unhidden(ls(path=path)) for path in paths)
+    output = (_formatted_children(unhidden(path=path)) for path in paths)
     if len(paths) > 1:
         output = _labelled(
             sorted(zip(paths, output), key=lambda (path, _) : path.path)
@@ -21,13 +18,13 @@ def _labelled(parents_and_children):
     )
 
 
-def _unhidden(children):
-    return _formatted_children(
-        children=(
-            child for child in children if not child.basename().startswith(".")
-        )
-    )
+def unhidden(path):
+    for child in path.children():
+        name = child.basename()
+        if name.startswith("."):
+            continue
+        yield name
 
 
 def _formatted_children(children):
-    return "  ".join(sorted(path.basename() for path in children)) + "\n"
+    return "  ".join(sorted(children)) + "\n"
