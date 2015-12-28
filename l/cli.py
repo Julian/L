@@ -2,7 +2,7 @@ from sys import stdout
 
 import click
 
-from l.core import show
+from l.core import columnized, ls, one_per_line
 from l.project import project
 
 
@@ -19,6 +19,19 @@ PROJECT = Project()
 
 @click.command()
 @click.option(
+    "-1", "--one-per-line", "output",
+    flag_value=one_per_line,
+    help="Force output to be one entry per line. "
+         "Note that unlike ls, when recursively listing directories, "
+         "also forces output to not be grouped by subdirectory.",
+)
+@click.option(
+    "--many-per-line", "output",
+    flag_value=columnized,
+    default=True,
+    help="Show human-readable, labelled output.",
+)
+@click.option(
     "-a", "--all",
     flag_value="all",
     help="Like -A, but also display '.' and '..'",
@@ -28,15 +41,21 @@ PROJECT = Project()
     flag_value="almost",
     help="Do not ignore entries that start with '.'",
 )
+@click.option(
+    "-R", "--recursive/--no-recursive",
+    default=False,
+    help="Recursively list the project.",
+)
 @click.argument(
     "paths",
     nargs=VARIADIC,
     type=PROJECT,
 )
-def run(all, paths, stdout=stdout):
+def run(all, paths, recursive, output, stdout=stdout):
     """
     Project-oriented directory and file information lister.
 
     """
 
-    stdout.write(show(paths=paths or (project("."),)))
+    contents = [(path, ls(path=path)) for path in paths or (project("."),)]
+    stdout.write(output(contents))

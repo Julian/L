@@ -18,6 +18,8 @@ def project(raw_path):
     return path
 
 
+# TODO: Really betterpath should have a separate interface for like,
+#       file systems, or listable things.
 class GitPath(object):
     def __init__(self, path):
         self._path = path
@@ -25,6 +27,10 @@ class GitPath(object):
     @property
     def path(self):
         return self._path.path
+
+    @property
+    def basename(self):
+        return self._path.basename
 
     def listdir(self):
         return check_output(
@@ -35,7 +41,7 @@ class GitPath(object):
         ).splitlines()
 
     def children(self):
-        return [self._path.__class__(path) for path in self.listdir()]
+        return [FilePath(path) for path in self.listdir()]
 
 
 class HgPath(object):
@@ -56,4 +62,4 @@ class HgPath(object):
         return (os.path.basename(path) for path in paths.splitlines())
 
     def children(self):
-        return [self._path.__class__(path) for path in self.listdir()]
+        return [FilePath(path) for path in self.listdir()]

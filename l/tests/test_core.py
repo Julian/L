@@ -6,17 +6,15 @@ from bp.memory import MemoryFS, MemoryPath
 from l import core
 
 
-class TestShow(TestCase):
+class TestOutputters(TestCase):
     def setUp(self):
         self.fs = MemoryFS()
         self.root = MemoryPath(fs=self.fs, path=("test-dir",))
         self.root.createDirectory()
 
-    def assertShows(self, result, **kwargs):
-        self.assertEqual(
-            core.show(**kwargs),
-            dedent(result).strip("\n") + "\n",
-        )
+    def assertOutputs(self, result, output, paths):
+        outputted = output([(path, core.ls(path=path)) for path in paths])
+        self.assertEqual(outputted, dedent(result).strip("\n") + "\n")
 
     def children(self, *new, **kwargs):
         of = kwargs.pop("of", self.root)
@@ -30,7 +28,11 @@ class TestShow(TestCase):
 
     def test_it_lists_directories(self):
         foo, bar = self.children("foo", "bar")
-        self.assertShows(paths=[self.root], result="bar  foo")
+        self.assertOutputs(
+            output=core.columnized,
+            paths=[self.root],
+            result="bar  foo",
+        )
 
     def test_it_lists_multiple_directories(self):
         one = self.root.child("one")
@@ -38,7 +40,8 @@ class TestShow(TestCase):
 
         three, = self.children("three")
 
-        self.assertShows(
+        self.assertOutputs(
+            output=core.columnized,
             paths=[self.root, one],
             result="""
             /mem/test-dir:
@@ -52,7 +55,11 @@ class TestShow(TestCase):
 
     def test_it_ignores_hidden_files_by_default(self):
         foo, hidden = self.children("foo", ".hidden")
-        self.assertShows(paths=[self.root], result="foo")
+        self.assertOutputs(
+            output=core.columnized,
+            paths=[self.root],
+            result="foo",
+        )
 
     def test_it_ignores_hidden_files_by_default_for_multiple_directories(self):
         one = self.root.child("one")
@@ -60,7 +67,8 @@ class TestShow(TestCase):
 
         three, = self.children(".three")
 
-        self.assertShows(
+        self.assertOutputs(
+            output=core.columnized,
             paths=[self.root, one],
             result="""
             /mem/test-dir:
@@ -68,5 +76,30 @@ class TestShow(TestCase):
 
             /mem/test-dir/one:
             four
+            """,
+        )
+
+    def test_it_lists_directories_one_per_line(self):
+        foo, bar = self.children("foo", "bar")
+        self.assertOutputs(
+            output=core.one_per_line,
+            paths=[self.root],
+            result="bar\nfoo\n",
+        )
+
+    def test_it_lists_multiple_absolute_directories_one_per_line(self):
+        one = self.root.child("one")
+        two, four = self.children("two", "four", of=one)
+
+        three, = self.children("three")
+
+        self.assertOutputs(
+            output=core.one_per_line,
+            paths=[self.root, one],
+            result="""
+            /mem/test-dir/one
+            /mem/test-dir/one/four
+            /mem/test-dir/one/two
+            /mem/test-dir/three
             """,
         )
