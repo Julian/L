@@ -24,7 +24,7 @@ setup(
     packages=find_packages(),
     install_requires=["betterpath", "click"],
     setup_requires=["vcversioner"],
-    entry_points={"console_scripts": ["l = l.cli:run"]},
+    entry_points={"console_scripts": ["l = l.cli:main"]},
     vcversioner={"version_module_paths": ["l/_version.py"]},
     author="Julian Berman",
     author_email="Julian@GrayVines.com",
