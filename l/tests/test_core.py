@@ -1,9 +1,10 @@
+from io import BytesIO
 from textwrap import dedent
 from unittest import TestCase
 
 from bp.memory import MemoryFS, MemoryPath
 
-from l import core
+from l import core, cli
 
 
 class TestOutputters(TestCase):
@@ -12,9 +13,11 @@ class TestOutputters(TestCase):
         self.root = MemoryPath(fs=self.fs, path=("test-dir",))
         self.root.createDirectory()
 
-    def assertOutputs(self, result, output, paths):
-        outputted = output([(path, core.ls(path=path)) for path in paths])
-        self.assertEqual(outputted, dedent(result).strip("\n") + "\n")
+    def assertOutputs(self, result, **kwargs):
+        kwargs.setdefault("recursive", None)
+        stdout = BytesIO()
+        cli.run(stdout=stdout, all=core.ls, **kwargs)
+        self.assertEqual(stdout.getvalue(), dedent(result).strip("\n") + "\n")
 
     def children(self, *new, **kwargs):
         of = kwargs.pop("of", self.root)
