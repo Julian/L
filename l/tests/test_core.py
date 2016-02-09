@@ -14,7 +14,7 @@ class TestOutputters(TestCase):
         self.root.createDirectory()
 
     def assertOutputs(self, result, **kwargs):
-        kwargs.setdefault("recursive", None)
+        kwargs.setdefault("recurse", core.flat)
         stdout = BytesIO()
         cli.run(stdout=stdout, all=core.ls, **kwargs)
         self.assertEqual(stdout.getvalue(), dedent(result).strip("\n") + "\n")
@@ -99,6 +99,41 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.one_per_line,
             paths=[self.root, one],
+            result="""
+            /mem/test-dir/one
+            /mem/test-dir/one/four
+            /mem/test-dir/one/two
+            /mem/test-dir/three
+            """,
+        )
+
+    def test_it_lists_directories_recursively(self):
+        one = self.root.child("one")
+        two, four = self.children("two", "four", of=one)
+
+        three, = self.children("three")
+        self.assertOutputs(
+            output=core.columnized,
+            recurse=core.recurse,
+            paths=[self.root],
+            result="""
+            /mem/test-dir:
+            one  three
+
+            /mem/test-dir/one:
+            four  two
+            """,
+        )
+
+    def test_it_lists_directories_recursively_one_per_line(self):
+        one = self.root.child("one")
+        two, four = self.children("two", "four", of=one)
+
+        three, = self.children("three")
+        self.assertOutputs(
+            output=core.one_per_line,
+            recurse=core.recurse,
+            paths=[self.root],
             result="""
             /mem/test-dir/one
             /mem/test-dir/one/four

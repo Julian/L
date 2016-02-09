@@ -45,3 +45,16 @@ def one_per_line(parents_and_children):
         )
 
     return "\n".join(paths) + "\n"
+
+
+def recurse(path):
+    working = [path]
+    while working:
+        path = working.pop()
+        children = ls(path=path)
+        yield path, children
+        working.extend(child for child in children if child.isdir())
+
+
+def flat(path):
+    return [(path, ls(path=path))]
