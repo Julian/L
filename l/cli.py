@@ -32,7 +32,7 @@ def run(all, paths, recurse, output, stdout=stdout):
 
 
 I_hate_everything = [
-    click.command(),
+    click.command(context_settings=dict(help_option_names=["-h", "--help"])),
     click.option(
         "-1", "--one-per-line", "output",
         flag_value=one_per_line,
