@@ -1,3 +1,16 @@
+class _FakeFilePath(object):
+    """
+    A thing that isn't really a path but which we trick outputting for.
+
+    """
+
+    def __init__(self, path):
+        self.path = path
+
+    def basename(self):
+        return self.path
+
+
 def ls(path):
     return [
         child for child in ls_almost_all(path=path)
@@ -7,6 +20,10 @@ def ls(path):
 
 def ls_almost_all(path):
     return path.children()
+
+
+def ls_all(path):
+    return [_FakeFilePath("."), _FakeFilePath("..")] + path.children()
 
 
 def columnized(paths):

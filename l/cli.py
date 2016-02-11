@@ -2,7 +2,9 @@ from sys import stdout
 
 import click
 
-from l.core import columnized, ls, ls_almost_all, one_per_line, recurse, flat
+from l.core import (
+    columnized, ls, ls_almost_all, ls_all, one_per_line, recurse, flat,
+)
 from l.project import project
 
 
@@ -48,7 +50,7 @@ I_hate_everything = [
     ),
     click.option(
         "-a", "--all", "ls",
-        flag_value=None,
+        flag_value=ls_all,
         help="Like -A, but also display '.' and '..'",
     ),
     click.option(
