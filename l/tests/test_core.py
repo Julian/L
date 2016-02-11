@@ -16,7 +16,7 @@ class TestOutputters(TestCase):
     def assertOutputs(self, result, **kwargs):
         kwargs.setdefault("recurse", core.flat)
         stdout = BytesIO()
-        cli.run(stdout=stdout, all=core.ls, **kwargs)
+        cli.run(stdout=stdout, **kwargs)
         self.assertEqual(stdout.getvalue(), dedent(result).strip("\n") + "\n")
 
     def children(self, *new, **kwargs):
@@ -79,6 +79,25 @@ class TestOutputters(TestCase):
 
             /mem/test-dir/one:
             four
+            """,
+        )
+
+    def test_it_can_list_almost_everything(self):
+        one = self.root.child("one")
+        two, four = self.children(".two", "four", of=one)
+
+        three, = self.children(".three")
+
+        self.assertOutputs(
+            ls=core.ls_almost_all,
+            output=core.columnized,
+            paths=[self.root, one],
+            result="""
+            /mem/test-dir:
+            .three  one
+
+            /mem/test-dir/one:
+            .two  four
             """,
         )
 

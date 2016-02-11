@@ -2,7 +2,7 @@ from sys import stdout
 
 import click
 
-from l.core import columnized, ls, one_per_line, recurse, flat
+from l.core import columnized, ls, ls_almost_all, one_per_line, recurse, flat
 from l.project import project
 
 
@@ -17,7 +17,7 @@ class Project(click.ParamType):
 PROJECT = Project()
 
 
-def run(all, paths, recurse, output, stdout=stdout):
+def run(paths, recurse, output, ls=ls, stdout=stdout):
     """
     Project-oriented directory and file information lister.
 
@@ -26,7 +26,7 @@ def run(all, paths, recurse, output, stdout=stdout):
     contents = [
         path_and_children
         for path in paths or (project("."),)
-        for path_and_children in recurse(path=path)
+        for path_and_children in recurse(path=path, ls=ls)
     ]
     stdout.write(output(contents))
 
@@ -47,14 +47,20 @@ I_hate_everything = [
         help="Show human-readable, labelled output.",
     ),
     click.option(
-        "-a", "--all",
-        flag_value="all",
+        "-a", "--all", "ls",
+        flag_value=None,
         help="Like -A, but also display '.' and '..'",
     ),
     click.option(
-        "-A", "--almost-all", "all",
-        flag_value="almost",
+        "-A", "--almost-all", "ls",
+        flag_value=ls_almost_all,
         help="Do not ignore entries that start with '.'",
+    ),
+    click.option(
+        "--some", "ls",
+        flag_value=ls,
+        default=True,
+        help="Ignore entities that start with '.'",
     ),
     click.option(
         "-R", "--recursive", "recurse",

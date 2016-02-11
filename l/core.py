@@ -1,12 +1,12 @@
 def ls(path):
     return [
-        child for child in path.children()
+        child for child in ls_almost_all(path=path)
         if not child.basename().startswith(".")
     ]
 
 
 def ls_almost_all(path):
-    return path.listdir()
+    return path.children()
 
 
 def columnized(paths):
@@ -47,7 +47,7 @@ def one_per_line(parents_and_children):
     return "\n".join(paths) + "\n"
 
 
-def recurse(path):
+def recurse(path, ls):
     working = [path]
     while working:
         path = working.pop()
@@ -56,5 +56,5 @@ def recurse(path):
         working.extend(child for child in children if child.isdir())
 
 
-def flat(path):
+def flat(path, ls):
     return [(path, ls(path=path))]
