@@ -120,6 +120,26 @@ class TestOutputters(TestCase):
             """,
         )
 
+    def test_it_can_list_everything_recursively(self):
+        one = self.root.child("one")
+        two, four = self.children(".two", "four", of=one)
+
+        three, = self.children(".three")
+
+        self.assertOutputs(
+            ls=core.ls_all,
+            output=core.columnized,
+            recurse=core.recurse,
+            paths=[self.root],
+            result="""
+            /mem/test-dir:
+            .  ..  .three  one
+
+            /mem/test-dir/one:
+            .  ..  .two  four
+            """,
+        )
+
     def test_it_lists_directories_one_per_line(self):
         foo, bar = self.children("foo", "bar")
         self.assertOutputs(

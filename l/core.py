@@ -10,6 +10,9 @@ class _FakeFilePath(object):
     def basename(self):
         return self.path
 
+    def isdir(self):
+        return False
+
 
 def ls(path):
     return [
