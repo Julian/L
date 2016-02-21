@@ -17,15 +17,16 @@ class Project(click.ParamType):
 PROJECT = Project()
 
 
-def run(paths, recurse, output, sort_by=None, ls=core.ls, stdout=stdout):
+def run(
+    paths, recurse, output, sort_by=lambda x : x, ls=core.ls, stdout=stdout,
+):
     """
     Project-oriented directory and file information lister.
 
     """
 
     def _sort_by(thing):
-        real_key = sort_by(thing) if sort_by is not None else thing
-        return not getattr(thing, "_always_sorts_first", False), real_key
+        return not getattr(thing, "_always_sorts_first", False), sort_by(thing)
 
     contents = [
         path_and_children
@@ -84,7 +85,7 @@ I_hate_everything = [
     ),
     click.option(
         "--no-group-directories-first", "sort_by",
-        flag_value=None,
+        flag_value=lambda thing : thing,
         default=True,
         help="Show content in alphabetical order regardless of type",
     ),
