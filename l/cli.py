@@ -2,9 +2,7 @@ from sys import stdout
 
 import click
 
-from l.core import (
-    columnized, ls, ls_almost_all, ls_all, one_per_line, recurse, flat,
-)
+from l import core
 from l.project import project
 
 
@@ -19,61 +17,76 @@ class Project(click.ParamType):
 PROJECT = Project()
 
 
-def run(paths, recurse, output, ls=ls, stdout=stdout):
+def run(paths, recurse, output, sort_by=None, ls=core.ls, stdout=stdout):
     """
     Project-oriented directory and file information lister.
 
     """
+
+    def _sort_by(thing):
+        real_key = sort_by(thing) if sort_by is not None else thing
+        return not getattr(thing, "_always_sorts_first", False), real_key
 
     contents = [
         path_and_children
         for path in paths or (project("."),)
         for path_and_children in recurse(path=path, ls=ls)
     ]
-    stdout.write(output(contents))
+    stdout.write(output(contents, sort_by=_sort_by))
 
 
 I_hate_everything = [
     click.command(context_settings=dict(help_option_names=["-h", "--help"])),
     click.option(
         "-1", "--one-per-line", "output",
-        flag_value=one_per_line,
+        flag_value=core.one_per_line,
         help="Force output to be one entry per line. "
             "Note that unlike ls, when recursively listing directories, "
             "also forces output to not be grouped by subdirectory.",
     ),
     click.option(
         "--many-per-line", "output",
-        flag_value=columnized,
+        flag_value=core.columnized,
         default=True,
         help="Show human-readable, labelled output.",
     ),
     click.option(
         "-a", "--all", "ls",
-        flag_value=ls_all,
+        flag_value=core.ls_all,
         help="Like -A, but also display '.' and '..'",
     ),
     click.option(
         "-A", "--almost-all", "ls",
-        flag_value=ls_almost_all,
+        flag_value=core.ls_almost_all,
         help="Do not ignore entries that start with '.'",
     ),
     click.option(
         "--some", "ls",
-        flag_value=ls,
+        flag_value=core.ls,
         default=True,
         help="Ignore entities that start with '.'",
     ),
     click.option(
         "-R", "--recursive", "recurse",
-        flag_value=recurse,
+        flag_value=core.recurse,
         help="Recursively list the project.",
     ),
     click.option(
         "--no-recursive", "recurse",
-        flag_value=flat,
+        flag_value=core.flat,
         default=True,
         help="Do not recursively list the project.",
+    ),
+    click.option(
+        "--group-directories-first", "sort_by",
+        flag_value=core.group_directories_first,
+        help="Show directories first in output",
+    ),
+    click.option(
+        "--no-group-directories-first", "sort_by",
+        flag_value=None,
+        default=True,
+        help="Show content in alphabetical order regardless of type",
     ),
     click.argument(
         "paths",

@@ -4,8 +4,16 @@ class _FakeFilePath(object):
 
     """
 
+    # XXX: A nasty hack for sorting
+    _always_sorts_first = True
+
     def __init__(self, path):
         self.path = path
+
+    def __lt__(self, other):
+        if not isinstance(other, self.__class__) or other.path not in "..":
+            raise TypeError(other)
+        return self.path <= other.path
 
     def basename(self):
         return self.path
@@ -29,28 +37,30 @@ def ls_all(path):
     return [_FakeFilePath("."), _FakeFilePath("..")] + path.children()
 
 
-def columnized(paths):
+def columnized(paths, sort_by):
     if len(paths) == 1:
         (_, children), = paths
-        return _tabularized(children)
-    return "\n".join(_labelled(sorted(paths)))
+        return _tabularized(children, sort_by=sort_by)
+    return "\n".join(_labelled(sorted(paths), sort_by=sort_by))
 
 
-def _labelled(parents_and_children):
+def _labelled(parents_and_children, sort_by):
     return (
         "{parent.path}:\n{children}".format(
             parent=parent,
-            children=_tabularized(children),
+            children=_tabularized(children, sort_by=sort_by),
         )
         for parent, children in parents_and_children
     )
 
 
-def _tabularized(children):
-    return "  ".join(sorted(child.basename() for child in children)) + "\n"
+def _tabularized(children, sort_by):
+    return "  ".join(
+        child.basename() for child in sorted(children, key=sort_by)
+    ) + "\n"
 
 
-def one_per_line(parents_and_children):
+def one_per_line(parents_and_children, sort_by):
     if len(parents_and_children) == 1:
         paths = (
             child.basename()
@@ -78,3 +88,7 @@ def recurse(path, ls):
 
 def flat(path, ls):
     return [(path, ls(path=path))]
+
+
+def group_directories_first(child):
+    return not child.isdir(), child

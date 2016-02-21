@@ -56,6 +56,18 @@ class TestOutputters(TestCase):
         )
 
 
+    def test_group_directories_first(self):
+        self.root.child("one").createDirectory()
+        self.root.child("two").createDirectory()
+        three, four = self.children("three", "four")
+
+        self.assertOutputs(
+            output=core.columnized,
+            sort_by=core.group_directories_first,
+            paths=[self.root],
+            result="one  two  four  three",
+        )
+
     def test_it_ignores_hidden_files_by_default(self):
         foo, hidden = self.children("foo", ".hidden")
         self.assertOutputs(
