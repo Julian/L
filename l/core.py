@@ -40,56 +40,55 @@ def ls_all(path):
 def columnized(paths, sort_by):
     if len(paths) == 1:
         (_, children), = paths
-        return _tabularized(children, sort_by=sort_by)
-    return "\n".join(_labelled(sorted(paths), sort_by=sort_by))
+        yield _tabularized(children, sort_by=sort_by)
+        return
+
+    labelled = _labelled(sorted(paths), sort_by=sort_by)
+    label, contents = next(labelled)
+    yield label
+    yield contents
+    for label, contents in labelled:
+        yield ""
+        yield label
+        yield contents
 
 
 def _labelled(parents_and_children, sort_by):
-    return (
-        "{parent.path}:\n{children}".format(
-            parent=parent,
-            children=_tabularized(children, sort_by=sort_by),
-        )
-        for parent, children in parents_and_children
-    )
+    for parent, children in parents_and_children:
+        yield parent.path + ":", _tabularized(children, sort_by=sort_by)
 
 
 def _tabularized(children, sort_by):
     return "  ".join(
         child.basename() for child in sorted(children, key=sort_by)
-    ) + "\n"
+    )
 
 
 def one_per_line(parents_and_children, sort_by):
     if len(parents_and_children) == 1:
-        paths = (
+        return (
             child.basename()
             for _, children in parents_and_children
             for child in sorted(children, key=sort_by)
         )
-    else:
-        ordered = sorted(
-            (
-                child
-                for _, children in parents_and_children
-                for child in children
-            ),
-            key=sort_by,
-        )
-        paths = (child.path for child in ordered)
-
-    return "\n".join(paths) + "\n"
+    paths = sorted(
+        (
+            child
+            for _, children in parents_and_children
+            for child in children
+        ),
+        key=sort_by,
+    )
+    return (child.path for child in paths)
 
 
 def as_tree(parents_and_children, sort_by):
-    lines = []
     for parent, children in parents_and_children:
         children = sorted(children, key=sort_by)
-        lines.append(parent.path)
-        rest, last = children[:-1], children[-1]
-        lines.extend("├── " + child.basename() for child in rest)
-        lines.append("└── " + last.basename())
-    return "\n".join(lines) + "\n"
+        yield parent.path
+        for child in children[:-1]:
+            yield "├── " + child.basename()
+        yield "└── " + children[-1].basename()
 
 
 def recurse(path, ls):

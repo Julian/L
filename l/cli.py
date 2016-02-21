@@ -33,7 +33,9 @@ def run(
         for path in paths or (project("."),)
         for path_and_children in recurse(path=path, ls=ls)
     ]
-    stdout.write(output(contents, sort_by=_sort_by))
+    for line in output(contents, sort_by=_sort_by):
+        stdout.write(line)
+        stdout.write("\n")
 
 
 I_hate_everything = [
