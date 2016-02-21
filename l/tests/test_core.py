@@ -68,6 +68,45 @@ class TestOutputters(TestCase):
             result="one  two  four  three",
         )
 
+    def test_group_directories_first_one_per_line(self):
+        self.root.child("one").createDirectory()
+        self.root.child("two").createDirectory()
+        three, four = self.children("three", "four")
+
+        self.assertOutputs(
+            output=core.one_per_line,
+            sort_by=core.group_directories_first,
+            paths=[self.root],
+            result="""
+            one
+            two
+            four
+            three
+            """,
+        )
+
+    def test_group_directories_first_multiple_one_per_line(self):
+        one = self.root.child("one")
+        self.root.child("two").createDirectory()
+        three, four = self.children("three", "four")
+        five, six = self.children("five", "six", of=one)
+        one.child("seven").createDirectory()
+
+        self.assertOutputs(
+            output=core.one_per_line,
+            sort_by=core.group_directories_first,
+            paths=[self.root, one],
+            result="""
+            /mem/test-dir/one
+            /mem/test-dir/one/seven
+            /mem/test-dir/two
+            /mem/test-dir/four
+            /mem/test-dir/one/five
+            /mem/test-dir/one/six
+            /mem/test-dir/three
+            """,
+        )
+
     def test_it_ignores_hidden_files_by_default(self):
         foo, hidden = self.children("foo", ".hidden")
         self.assertOutputs(
@@ -209,5 +248,53 @@ class TestOutputters(TestCase):
             /mem/test-dir/one/four
             /mem/test-dir/one/two
             /mem/test-dir/three
+            """,
+        )
+
+    def test_it_lists_flat_trees(self):
+        foo, bar = self.children("foo", "bar")
+        self.assertOutputs(
+            output=core.as_tree,
+            paths=[self.root],
+            result="""
+            /mem/test-dir
+            ├── bar
+            └── foo
+            """
+        )
+
+    def test_it_lists_multiple_flat_directories_as_trees(self):
+        one, two = self.children("one", "two")
+        foo, bar = self.children("foo", "bar", of=one)
+        baz, quux = self.children("baz", "quux", of=two)
+
+        self.assertOutputs(
+            output=core.as_tree,
+            paths=[one, two],
+            result="""
+            /mem/test-dir/one
+            ├── bar
+            └── foo
+            /mem/test-dir/two
+            ├── baz
+            └── quux
+            """,
+        )
+
+    def test_group_directories_first_as_tree(self):
+        self.root.child("one").createDirectory()
+        self.root.child("two").createDirectory()
+        three, four = self.children("three", "four")
+
+        self.assertOutputs(
+            output=core.as_tree,
+            sort_by=core.group_directories_first,
+            paths=[self.root],
+            result="""
+            /mem/test-dir
+            ├── one
+            ├── two
+            ├── four
+            └── three
             """,
         )

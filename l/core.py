@@ -65,16 +65,31 @@ def one_per_line(parents_and_children, sort_by):
         paths = (
             child.basename()
             for _, children in parents_and_children
-            for child in sorted(children)
+            for child in sorted(children, key=sort_by)
         )
     else:
-        paths = sorted(
-            child.path
-            for _, children in parents_and_children
-            for child in children
+        ordered = sorted(
+            (
+                child
+                for _, children in parents_and_children
+                for child in children
+            ),
+            key=sort_by,
         )
+        paths = (child.path for child in ordered)
 
     return "\n".join(paths) + "\n"
+
+
+def as_tree(parents_and_children, sort_by):
+    lines = []
+    for parent, children in parents_and_children:
+        children = sorted(children, key=sort_by)
+        lines.append(parent.path)
+        rest, last = children[:-1], children[-1]
+        lines.extend("├── " + child.basename() for child in rest)
+        lines.append("└── " + last.basename())
+    return "\n".join(lines) + "\n"
 
 
 def recurse(path, ls):

@@ -52,6 +52,11 @@ I_hate_everything = [
         help="Show human-readable, labelled output.",
     ),
     click.option(
+        "--tree", "output",
+        flag_value=core.as_tree,
+        help="Output contents as a tree, like tree(1)",
+    ),
+    click.option(
         "-a", "--all", "ls",
         flag_value=core.ls_all,
         help="Like -A, but also display '.' and '..'",
