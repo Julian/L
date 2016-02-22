@@ -25,6 +25,9 @@ def run(
 
     """
 
+    if output == "AUTOMATIC":
+        output = core.columnized if stdout.isatty() else core.one_per_line
+
     def _sort_by(thing):
         return not getattr(thing, "_always_sorts_first", False), sort_by(thing)
 
@@ -50,13 +53,18 @@ I_hate_everything = [
     click.option(
         "--many-per-line", "output",
         flag_value=core.columnized,
-        default=True,
         help="Show human-readable, labelled output.",
     ),
     click.option(
         "--tree", "output",
         flag_value=core.as_tree,
         help="Output contents as a tree, like tree(1)",
+    ),
+    click.option(
+        "--auto-output", "output",
+        flag_value="AUTOMATIC",
+        default=True,
+        help="Pick an output format intelligently.",
     ),
     click.option(
         "-a", "--all", "ls",
