@@ -17,7 +17,9 @@ class TestOutputters(TestCase):
         kwargs.setdefault("recurse", core.flat)
         stdout = BytesIO()
         cli.run(stdout=stdout, **kwargs)
-        self.assertEqual(stdout.getvalue(), dedent(result).strip("\n") + "\n")
+        if result:
+            result = dedent(result).strip("\n") + "\n"
+        self.assertEqual(stdout.getvalue(), result)
 
     def children(self, *new, **kwargs):
         of = kwargs.pop("of", self.root)
@@ -297,4 +299,25 @@ class TestOutputters(TestCase):
             ├── four
             └── three
             """,
+        )
+
+    def test_it_lists_empty_directories(self):
+        self.assertOutputs(
+            output=core.columnized,
+            paths=[self.root],
+            result="",
+        )
+
+    def test_it_lists_empty_directories_one_per_line(self):
+        self.assertOutputs(
+            output=core.one_per_line,
+            paths=[self.root],
+            result="",
+        )
+
+    def test_it_lists_empty_directories_as_tree(self):
+        self.assertOutputs(
+            output=core.as_tree,
+            paths=[self.root],
+            result="/mem/test-dir\n",
         )

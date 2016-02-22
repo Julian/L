@@ -40,7 +40,8 @@ def ls_all(path):
 def columnized(paths, sort_by):
     if len(paths) == 1:
         (_, children), = paths
-        yield _tabularized(children, sort_by=sort_by)
+        if children:
+            yield _tabularized(children, sort_by=sort_by)
         return
 
     labelled = _labelled(sorted(paths), sort_by=sort_by)
@@ -84,11 +85,12 @@ def one_per_line(parents_and_children, sort_by):
 
 def as_tree(parents_and_children, sort_by):
     for parent, children in parents_and_children:
-        children = sorted(children, key=sort_by)
         yield parent.path
-        for child in children[:-1]:
-            yield "├── " + child.basename()
-        yield "└── " + children[-1].basename()
+        children = sorted(children, key=sort_by)
+        if children:
+            for child in children[:-1]:
+                yield "├── " + child.basename()
+            yield "└── " + children[-1].basename()
 
 
 def recurse(path, ls):
