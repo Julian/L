@@ -17,9 +17,7 @@ class TestOutputters(TestCase):
         kwargs.setdefault("recurse", core.flat)
         stdout = BytesIO()
         cli.run(stdout=stdout, **kwargs)
-        if result:
-            result = dedent(result).strip("\n") + "\n"
-        self.assertEqual(stdout.getvalue(), result)
+        self.assertEqual(stdout.getvalue(), dedent(result))
 
     def children(self, *new, **kwargs):
         of = kwargs.pop("of", self.root)
@@ -36,7 +34,7 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.columnized,
             paths=[self.root],
-            result="bar  foo",
+            result="bar  foo\n",
         )
 
     def test_it_lists_multiple_directories(self):
@@ -48,7 +46,7 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.columnized,
             paths=[self.root, one],
-            result="""
+            result="""\
             /mem/test-dir:
             one  three
 
@@ -67,7 +65,7 @@ class TestOutputters(TestCase):
             output=core.columnized,
             sort_by=core.group_directories_first,
             paths=[self.root],
-            result="one  two  four  three",
+            result="one  two  four  three\n",
         )
 
     def test_group_directories_first_one_per_line(self):
@@ -79,7 +77,7 @@ class TestOutputters(TestCase):
             output=core.one_per_line,
             sort_by=core.group_directories_first,
             paths=[self.root],
-            result="""
+            result="""\
             one
             two
             four
@@ -98,7 +96,7 @@ class TestOutputters(TestCase):
             output=core.one_per_line,
             sort_by=core.group_directories_first,
             paths=[self.root, one],
-            result="""
+            result="""\
             /mem/test-dir/one
             /mem/test-dir/one/seven
             /mem/test-dir/two
@@ -114,7 +112,7 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.columnized,
             paths=[self.root],
-            result="foo",
+            result="foo\n",
         )
 
     def test_it_ignores_hidden_files_by_default_for_multiple_directories(self):
@@ -126,7 +124,7 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.columnized,
             paths=[self.root, one],
-            result="""
+            result="""\
             /mem/test-dir:
             one
 
@@ -145,7 +143,7 @@ class TestOutputters(TestCase):
             ls=core.ls_almost_all,
             output=core.columnized,
             paths=[self.root, one],
-            result="""
+            result="""\
             /mem/test-dir:
             .three  one
 
@@ -164,7 +162,7 @@ class TestOutputters(TestCase):
             ls=core.ls_all,
             output=core.columnized,
             paths=[self.root, one],
-            result="""
+            result="""\
             /mem/test-dir:
             .  ..  .three  one
 
@@ -184,7 +182,7 @@ class TestOutputters(TestCase):
             output=core.columnized,
             recurse=core.recurse,
             paths=[self.root],
-            result="""
+            result="""\
             /mem/test-dir:
             .  ..  .three  one
 
@@ -210,7 +208,7 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.one_per_line,
             paths=[self.root, one],
-            result="""
+            result="""\
             /mem/test-dir/one
             /mem/test-dir/one/four
             /mem/test-dir/one/two
@@ -227,7 +225,7 @@ class TestOutputters(TestCase):
             output=core.columnized,
             recurse=core.recurse,
             paths=[self.root],
-            result="""
+            result="""\
             /mem/test-dir:
             one  three
 
@@ -245,7 +243,7 @@ class TestOutputters(TestCase):
             output=core.one_per_line,
             recurse=core.recurse,
             paths=[self.root],
-            result="""
+            result="""\
             /mem/test-dir/one
             /mem/test-dir/one/four
             /mem/test-dir/one/two
@@ -258,11 +256,11 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.as_tree,
             paths=[self.root],
-            result="""
+            result="""\
             /mem/test-dir
             ├── bar
             └── foo
-            """
+            """,
         )
 
     def test_it_lists_multiple_flat_directories_as_trees(self):
@@ -273,7 +271,7 @@ class TestOutputters(TestCase):
         self.assertOutputs(
             output=core.as_tree,
             paths=[one, two],
-            result="""
+            result="""\
             /mem/test-dir/one
             ├── bar
             └── foo
@@ -292,7 +290,7 @@ class TestOutputters(TestCase):
             output=core.as_tree,
             sort_by=core.group_directories_first,
             paths=[self.root],
-            result="""
+            result="""\
             /mem/test-dir
             ├── one
             ├── two
@@ -320,4 +318,25 @@ class TestOutputters(TestCase):
             output=core.as_tree,
             paths=[self.root],
             result="/mem/test-dir\n",
+        )
+
+    def test_it_lists_multiple_empty_directories(self):
+        self.assertOutputs(
+            output=core.columnized,
+            paths=[self.root, self.root],
+            result="/mem/test-dir:\n\n\n/mem/test-dir:\n\n",
+        )
+
+    def test_it_lists_multiple_empty_directories_one_per_line(self):
+        self.assertOutputs(
+            output=core.one_per_line,
+            paths=[self.root, self.root],
+            result="",
+        )
+
+    def test_it_lists_multiple_empty_directories_as_tree(self):
+        self.assertOutputs(
+            output=core.as_tree,
+            paths=[self.root, self.root],
+            result="/mem/test-dir\n" * 2,
         )
