@@ -6,6 +6,7 @@ from l import core
 from l.project import project
 
 
+_I_STILL_HATE_EVERYTHING = object()  # click uses None for "no flag_value"
 VARIADIC = -1  # click uses -1 for nargs which is very hard to read
 
 
@@ -19,7 +20,7 @@ PROJECT = Project()
 
 def run(
     paths,
-    output,
+    output=_I_STILL_HATE_EVERYTHING,
     recurse=core.flat,
     sort_by=lambda x : x,
     ls=core.ls,
@@ -30,7 +31,7 @@ def run(
 
     """
 
-    if output == "AUTOMATIC":
+    if output is _I_STILL_HATE_EVERYTHING:
         output = core.columnized if stdout.isatty() else core.one_per_line
 
     def _sort_by(thing):
@@ -67,7 +68,7 @@ I_hate_everything = [
     ),
     click.option(
         "--auto-output", "output",
-        flag_value="AUTOMATIC",
+        flag_value=_I_STILL_HATE_EVERYTHING,
         default=True,
         help="Pick an output format intelligently.",
     ),
