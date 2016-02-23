@@ -18,7 +18,12 @@ PROJECT = Project()
 
 
 def run(
-    paths, recurse, output, sort_by=lambda x : x, ls=core.ls, stdout=stdout,
+    paths,
+    output,
+    recurse=core.flat,
+    sort_by=lambda x : x,
+    ls=core.ls,
+    stdout=stdout,
 ):
     """
     Project-oriented directory and file information lister.

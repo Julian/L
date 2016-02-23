@@ -14,7 +14,6 @@ class TestOutputters(TestCase):
         self.root.createDirectory()
 
     def assertOutputs(self, result, **kwargs):
-        kwargs.setdefault("recurse", core.flat)
         stdout = BytesIO()
         cli.run(stdout=stdout, **kwargs)
         self.assertEqual(stdout.getvalue(), dedent(result))
