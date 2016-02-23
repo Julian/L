@@ -2,35 +2,36 @@ from subprocess import check_output
 import os
 
 from bp.filepath import FilePath
+from characteristic import Attribute, attributes
 
 
-def project(raw_path):
-    path = FilePath(raw_path)
-
+def from_path(path):
     git_dir = path.child(".git")
     if git_dir.isdir():
-        return GitPath(git_dir)
+        return GitPath(git_dir=git_dir)
 
     hg_dir = path.child(".hg")
     if hg_dir.isdir():
-        return HgPath(path)
+        return HgPath(hg_dir=hg_dir)
 
     return path
 
 
 # TODO: Really betterpath should have a separate interface for like,
 #       file systems, or listable things.
+@attributes(
+    [
+        Attribute(name="_git_dir"),
+    ],
+)
 class GitPath(object):
-    def __init__(self, path):
-        self._path = path
-
     @property
     def path(self):
-        return self._path.path
+        return self._git_dir.path
 
     @property
     def basename(self):
-        return self._path.basename
+        return self._git_dir.basename
 
     def listdir(self):
         return check_output(
@@ -44,13 +45,15 @@ class GitPath(object):
         return [FilePath(path) for path in self.listdir()]
 
 
+@attributes(
+    [
+        Attribute(name="_hg_dir"),
+    ],
+)
 class HgPath(object):
-    def __init__(self, path):
-        self._path = path
-
     @property
     def path(self):
-        return self._path.path
+        return self._hg_dir.path
 
     def listdir(self):
         paths = check_output(

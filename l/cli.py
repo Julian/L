@@ -1,9 +1,9 @@
 from sys import stdout
 
+from bp.filepath import FilePath
 import click
 
-from l import core
-from l.project import project
+from l import core, project
 
 
 _I_STILL_HATE_EVERYTHING = object()  # click uses None for "no flag_value"
@@ -12,7 +12,9 @@ VARIADIC = -1  # click uses -1 for nargs which is very hard to read
 
 class Project(click.ParamType):
     name = "project"
-    convert = lambda self, value, param, ctx : project(value)
+
+    def convert(self, value, param, context):
+        return project.from_path(value)
 
 
 PROJECT = Project()
@@ -39,7 +41,7 @@ def run(
 
     contents = [
         path_and_children
-        for path in paths or (project("."),)
+        for path in paths or (project.from_path(FilePath(".")),)
         for path_and_children in recurse(path=path, ls=ls)
     ]
     for line in output(contents, sort_by=_sort_by):
