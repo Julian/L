@@ -1,7 +1,10 @@
 from sys import stdout
+import errno
 
+from appdirs import user_config_dir
 from bp.filepath import FilePath
 import click
+import toml
 
 from l import core, project
 
@@ -119,6 +122,19 @@ I_hate_everything = [
     ),
 ]
 
-main = run
+_main = run
 for add_cli_thing_to in reversed(I_hate_everything):
-    main = add_cli_thing_to(main)
+    _main = add_cli_thing_to(_main)
+
+
+def main():
+    config_dir = FilePath(user_config_dir("l"))
+    try:
+        contents = config_dir.child("config.toml").getContent()
+    except IOError as error:
+        if error.errno != errno.ENOENT:
+            raise
+        config = {}
+    else:
+        config = toml.loads(contents)
+    _main(default_map=config)

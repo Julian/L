@@ -22,7 +22,7 @@ classifiers = [
 setup(
     name="l",
     packages=find_packages(),
-    install_requires=["betterpath", "click"],
+    install_requires=["appdirs", "betterpath", "click", "toml"],
     setup_requires=["vcversioner"],
     entry_points={"console_scripts": ["l = l.cli:main"]},
     vcversioner={"version_module_paths": ["l/_version.py"]},

@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 class _FakeFilePath(object):
     """
     A thing that isn't really a path but which we trick outputting for.
