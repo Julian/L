@@ -1,5 +1,5 @@
-from subprocess import check_output
 import os
+import subprocess
 
 from bp.filepath import FilePath
 from characteristic import Attribute, attributes
@@ -8,7 +8,17 @@ from characteristic import Attribute, attributes
 def from_path(path):
     git_dir = path.child(".git")
     if git_dir.isdir():
-        return GitPath(git_dir=git_dir)
+        return GitPath(git_dir=git_dir, path=path)
+    else:
+        git = subprocess.Popen(
+            ["git", "rev-parse", "--is-inside-work-tree"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=path.path,
+        )
+        stdout, _ = git.communicate()
+        if stdout == "true\n":
+            return GitPath(path=path)
 
     hg_dir = path.child(".hg")
     if hg_dir.isdir():
@@ -21,25 +31,25 @@ def from_path(path):
 #       file systems, or listable things.
 @attributes(
     [
-        Attribute(name="_git_dir"),
+        Attribute(name="_git_dir", default_value=None),
+        Attribute(name="_path"),
     ],
 )
 class GitPath(object):
     @property
     def path(self):
-        return self._git_dir.path
+        return self._path.path
 
     @property
     def basename(self):
-        return self._git_dir.basename
+        return self._path.basename
 
     def listdir(self):
-        return check_output(
-            [
-                "git", "--git-dir", self.path,
-                "ls-tree", "--name-only", "HEAD",
-            ],
-        ).splitlines()
+        argv = ["git"]
+        if self._git_dir is not None:
+            argv.extend(["--git-dir", self._git_dir.path])
+        argv.extend(["ls-tree", "--name-only", "HEAD", self.path])
+        return subprocess.check_output(argv).splitlines()
 
     def children(self):
         return [FilePath(path) for path in self.listdir()]
@@ -56,7 +66,7 @@ class HgPath(object):
         return self._hg_dir.path
 
     def listdir(self):
-        paths = check_output(
+        paths = subprocess.check_output(
             [
                 "hg", "--repository", self.path,
                 "files", "--include", "*", "--exclude", "*/*",

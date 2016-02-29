@@ -14,7 +14,7 @@ class Project(click.ParamType):
     name = "project"
 
     def convert(self, value, param, context):
-        return project.from_path(value)
+        return project.from_path(FilePath(value))
 
 
 PROJECT = Project()

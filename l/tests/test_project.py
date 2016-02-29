@@ -15,7 +15,10 @@ class TestProjectDetection(TestCase):
         self.root.child(".git").createDirectory()
         self.assertEqual(
             project.from_path(self.root),
-            project.GitPath(git_dir=self.root.child(".git")),
+            project.GitPath(
+                git_dir=self.root.child(".git"),
+                path=self.root,
+            ),
         )
 
     def test_it_detects_hg_repositories(self):
