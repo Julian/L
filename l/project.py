@@ -47,6 +47,9 @@ def from_path(path):
     ],
 )
 class GitPath(object):
+
+    walk = genericWalk
+
     def listdir(self):
         argv = ["git"]
         if self._git_dir is not None:
@@ -65,6 +68,9 @@ class GitPath(object):
     ],
 )
 class HgPath(object):
+
+    walk = genericWalk
+
     def listdir(self):
         paths = subprocess.check_output(
             [
@@ -103,7 +109,6 @@ for attribute in [
     "remove",
     "setContent",
     "sibling",
-    "walk",
 ]:
     proxy = _proxy_for_attribute(name=attribute)
     setattr(GitPath, attribute, proxy)
