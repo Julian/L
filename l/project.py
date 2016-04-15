@@ -43,7 +43,8 @@ def from_path(path):
 @attributes(
     [
         Attribute(name="_git_dir", default_value=None, exclude_from_repr=True),
-        Attribute(name="_path"),
+        Attribute(name="_path", exclude_from_repr=True),
+        Attribute(name="path", exclude_from_init=True),
     ],
 )
 class GitPath(object):
@@ -65,6 +66,7 @@ class GitPath(object):
 @attributes(
     [
         Attribute(name="_hg_dir", exclude_from_repr=True),
+        Attribute(name="path", exclude_from_init=True),
     ],
 )
 class HgPath(object):
