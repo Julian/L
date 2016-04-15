@@ -2,9 +2,8 @@ import errno
 import os
 import subprocess
 
-from bp.abstract import IFilePath
+from bp import abstract, generic
 from bp.filepath import FilePath
-from bp.generic import genericWalk
 from characteristic import Attribute, attributes
 from zope.interface import implementer
 
@@ -32,14 +31,14 @@ def from_path(path):
 
     hg_dir = path.child(".hg")
     if hg_dir.isdir():
-        return HgPath(hg_dir=hg_dir)
+        return HgPath(hg_dir=hg_dir, path=path)  # XXX
 
     return path
 
 
 # TODO: Really betterpath should have a separate interface for like,
 #       file systems, or listable things.
-@implementer(IFilePath)
+@implementer(abstract.IFilePath)
 @attributes(
     [
         Attribute(name="_git_dir", default_value=None, exclude_from_repr=True),
@@ -49,7 +48,25 @@ def from_path(path):
 )
 class GitPath(object):
 
-    walk = genericWalk
+    children = generic.genericChildren
+    segmentsFrom = generic.genericSegmentsFrom
+    walk = generic.genericWalk
+
+    def __init__(self):
+        if self._git_dir is None:
+            self._git_dir = self._path
+
+    def clonePath(self, path):
+        return GitPath(git_dir=self._git_dir, path=path)
+
+    def child(self, name):
+        child = self._path.child(name)
+        return GitPath(git_dir=self._git_dir, path=child)
+
+    def parent(self):
+        if self._path == self._git_dir:
+            return self
+        return self.clonePath(path=self._path.parent())
 
     def listdir(self):
         argv = ["git"]
@@ -58,20 +75,35 @@ class GitPath(object):
         argv.extend(["ls-tree", "--name-only", "HEAD", self.path])
         return subprocess.check_output(argv).splitlines()
 
-    def children(self):
-        return [FilePath(path) for path in self.listdir()]
 
-
-@implementer(IFilePath)
+@implementer(abstract.IFilePath)
 @attributes(
     [
-        Attribute(name="_hg_dir", exclude_from_repr=True),
+        Attribute(name="_hg_dir", default_value=None, exclude_from_repr=True),
+        Attribute(name="_path", exclude_from_repr=True),
         Attribute(name="path", exclude_from_init=True),
     ],
 )
 class HgPath(object):
 
-    walk = genericWalk
+    children = generic.genericChildren
+    segmentsFrom = generic.genericSegmentsFrom
+    walk = generic.genericWalk
+
+    def __init__(self):
+        if self._hg_dir is None:
+            self._hg_dir = self._path
+
+    def clonePath(self, path):
+        return HgPath(hg_dir=self._hg_dir, path=path)
+
+    def child(self, name):
+        return self.clonePath(path=self._path.child(name))
+
+    def parent(self):
+        if self._path == self._hg_dir:
+            return self
+        return self.clonePath(path=self._path.parent())
 
     def listdir(self):
         paths = subprocess.check_output(
@@ -82,9 +114,6 @@ class HgPath(object):
         )
         return (os.path.basename(path) for path in paths.splitlines())
 
-    def children(self):
-        return [FilePath(path) for path in self.listdir()]
-
 
 def _proxy_for_attribute(name):
     return property(lambda self: getattr(self._path, name))
@@ -93,7 +122,6 @@ def _proxy_for_attribute(name):
 for attribute in [
     "basename",
     "changed",
-    "child",
     "createDirectory",
     "exists",
     "getAccessTime",
@@ -105,7 +133,6 @@ for attribute in [
     "isfile",
     "islink",
     "open",
-    "parent",
     "path",
     "realpath",
     "remove",
