@@ -1,6 +1,8 @@
 from unittest import TestCase
 
+from bp.abstract import IFilePath
 from bp.memory import MemoryFS, MemoryPath
+from zope.interface import verify
 
 from l import project
 
@@ -30,3 +32,9 @@ class TestProjectDetection(TestCase):
 
     def test_it_detects_normal_directories(self):
         self.assertEqual(project.from_path(self.root), self.root)
+
+    def test_git_paths_are_IFilePaths(self):
+        verify.verifyClass(IFilePath, project.GitPath)
+
+    def test_hg_paths_are_IFilePaths(self):
+        verify.verifyClass(IFilePath, project.HgPath)
