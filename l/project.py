@@ -4,6 +4,7 @@ import subprocess
 
 from bp.abstract import IFilePath
 from bp.filepath import FilePath
+from bp.generic import genericWalk
 from characteristic import Attribute, attributes
 from zope.interface import implementer
 
@@ -41,7 +42,7 @@ def from_path(path):
 @implementer(IFilePath)
 @attributes(
     [
-        Attribute(name="_git_dir", default_value=None),
+        Attribute(name="_git_dir", default_value=None, exclude_from_repr=True),
         Attribute(name="_path"),
     ],
 )
@@ -60,7 +61,7 @@ class GitPath(object):
 @implementer(IFilePath)
 @attributes(
     [
-        Attribute(name="_hg_dir"),
+        Attribute(name="_hg_dir", exclude_from_repr=True),
     ],
 )
 class HgPath(object):
