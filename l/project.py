@@ -52,10 +52,6 @@ class GitPath(object):
     segmentsFrom = generic.genericSegmentsFrom
     walk = generic.genericWalk
 
-    def __init__(self):
-        if self._git_dir is None:
-            self._git_dir = self._path
-
     def clonePath(self, path):
         return GitPath(git_dir=self._git_dir, path=path)
 
@@ -136,6 +132,7 @@ for attribute in [
     "path",
     "realpath",
     "remove",
+    "sep",  # Apparently not in IFilePath
     "setContent",
     "sibling",
 ]:
