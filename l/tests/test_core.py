@@ -250,6 +250,29 @@ class TestOutputters(TestCase):
             """,
         )
 
+    def test_it_lists_nested_trees(self):
+        one, two = self.root.child("one"), self.root.child("two")
+        foo, bar = self.children("foo", "bar", of=one)
+        two.createDirectory()
+        two.child("quux").setContent("")
+        two.child("baz").createDirectory()
+        two.child("baz").child("spam").setContent("")
+
+        self.assertOutputs(
+            output=core.as_tree,
+            paths=[self.root],
+            result="""\
+            /mem/test-dir
+            ├── one
+            │   ├── bar
+            │   └── foo
+            └── two
+                ├── baz
+                │   └── spam
+                └── quux
+            """,
+        )
+
     def test_it_lists_flat_trees(self):
         foo, bar = self.children("foo", "bar")
         self.assertOutputs(
@@ -263,7 +286,7 @@ class TestOutputters(TestCase):
         )
 
     def test_it_lists_multiple_flat_directories_as_trees(self):
-        one, two = self.children("one", "two")
+        one, two = self.root.child("one"), self.root.child("two")
         foo, bar = self.children("foo", "bar", of=one)
         baz, quux = self.children("baz", "quux", of=two)
 

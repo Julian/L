@@ -1,3 +1,8 @@
+_CENTRAL = "├── "
+_LAST = "└── "
+_VERTICAL = "│   "
+
+
 class _FakeFilePath(object):
     """
     A thing that isn't really a path but which we trick outputting for.
@@ -84,13 +89,26 @@ def one_per_line(parents_and_children, sort_by):
 
 
 def as_tree(parents_and_children, sort_by):
-    for parent, children in parents_and_children:
-        yield parent.path
-        children = sorted(children, key=sort_by)
-        if children:
-            for child in children[:-1]:
-                yield "├── " + child.basename()
-            yield "└── " + children[-1].basename()
+    for root, _ in parents_and_children:
+        yield root.path
+        for line in _as_tree(node=root, sort_by=sort_by, prefix="") :
+            yield line
+
+
+def _as_tree(node, sort_by, prefix):
+    children = node.children()
+    if children:
+        children.sort(key=sort_by)
+        for child in children[:-1]:
+            yield prefix + "├── " + child.basename()
+            if child.isdir():
+                for line in _as_tree(child, sort_by, prefix + _VERTICAL):
+                    yield line
+        child = children[-1]
+        yield prefix + "└── " + child.basename()
+        if child.isdir():
+            for line in _as_tree(child, sort_by, prefix + "    "):
+                yield line
 
 
 def recurse(path, ls):
