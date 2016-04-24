@@ -68,8 +68,10 @@ class GitPath(object):
         argv = ["git"]
         if self._git_dir is not None:
             argv.extend(["--git-dir", self._git_dir.path])
-        argv.extend(["ls-tree", "--name-only", "HEAD", self.path])
-        return subprocess.check_output(argv).splitlines()
+        path = self.path + "/" if self.isdir() else ""
+        argv.extend(["ls-tree", "--name-only", "HEAD", path])
+        listdir = subprocess.check_output(argv).splitlines()
+        return [outputted.rpartition("/")[2] for outputted in listdir]
 
 
 @implementer(abstract.IFilePath)
