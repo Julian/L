@@ -120,7 +120,6 @@ I_hate_everything = [
     click.option(
         "--no-group-directories-first", "sort_by",
         flag_value=lambda thing : thing,
-        default=True,
         help="Show content in alphabetical order regardless of type",
     ),
     click.argument(
