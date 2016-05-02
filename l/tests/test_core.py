@@ -362,3 +362,29 @@ class TestOutputters(TestCase):
             paths=[self.root, self.root],
             result="/mem/test-dir\n" * 2,
         )
+
+    def test_it_ignores_leading_punctuation_when_sorting_as_tree(self):
+        one, two, three = self.children("[]one", "two", ".three")
+        self.assertOutputs(
+            output=core.as_tree,
+            paths=[self.root],
+            result="""\
+            /mem/test-dir
+            ├── []one
+            ├── .three
+            └── two
+            """,
+        )
+
+    def test_it_ignores_case_when_sorting_as_tree(self):
+        one, two, three = self.children("one", "TWO", "thrEE")
+        self.assertOutputs(
+            output=core.as_tree,
+            paths=[self.root],
+            result="""\
+            /mem/test-dir
+            ├── one
+            ├── thrEE
+            └── TWO
+            """,
+        )

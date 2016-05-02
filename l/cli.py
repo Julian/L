@@ -1,4 +1,5 @@
 from sys import stdout
+import string
 
 from bp.filepath import FilePath
 import click
@@ -24,7 +25,7 @@ def run(
     paths,
     output=_I_STILL_HATE_EVERYTHING,
     recurse=core.flat,
-    sort_by=lambda x : x,
+    sort_by=None,
     ls=core.ls,
     stdout=stdout,
 ):
@@ -35,6 +36,16 @@ def run(
 
     if output is _I_STILL_HATE_EVERYTHING:
         output = core.columnized if stdout.isatty() else core.one_per_line
+    if sort_by is None:
+        if output == core.as_tree:
+            def sort_by(thing):
+                return (
+                    thing.parent(),
+                    thing.basename().lstrip(string.punctuation).lower(),
+                )
+        else:
+            def sort_by(thing):
+                return thing
 
     def _sort_by(thing):
         return not getattr(thing, "_always_sorts_first", False), sort_by(thing)
