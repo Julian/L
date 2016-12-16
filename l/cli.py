@@ -4,7 +4,7 @@ import string
 from bp.filepath import FilePath
 import click
 
-from l import core, project
+from l import __version__, core, project
 
 
 _I_STILL_HATE_EVERYTHING = object()  # click uses None for "no flag_value"
@@ -62,6 +62,7 @@ def run(
 
 I_hate_everything = [
     click.command(context_settings=dict(help_option_names=["-h", "--help"])),
+    click.version_option(version=__version__, prog_name="l"),
     click.option(
         "-1", "--one-per-line", "output",
         flag_value=core.one_per_line,
